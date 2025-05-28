@@ -31,7 +31,7 @@ export default async function handler(req, res) {
       'Sec-Fetch-Dest': 'empty',
       'Sec-Fetch-Mode': 'cors',
       'Sec-Fetch-Site': 'cross-site',
-      'X-Forwarded-For': '103.197.204.1', // Bangladesh IP range
+      'X-Forwarded-For': '103.179.156.62', // Bangladesh IP range
       'CF-IPCountry': 'BD'
     };
 
