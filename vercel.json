@@ -1,10 +1,22 @@
 {
   "functions": {
-    "api/proxy.js": {
-      "maxDuration": 30
+    "api/playlist.js": {
+      "maxDuration": 10
+    },
+    "api/admin.js": {
+      "maxDuration": 15
     }
   },
-
+  "rewrites": [
+    {
+      "source": "/admin",
+      "destination": "/public/admin.html"
+    },
+    {
+      "source": "/playlist",
+      "destination": "/api/playlist"
+    }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
@@ -19,7 +31,7 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization, Range"
+          "value": "Content-Type, Authorization"
         }
       ]
     }
