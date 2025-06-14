@@ -1,14 +1,22 @@
 {
-  "name": "tsports-proxy",
+  "name": "iptv-playlist-tracker",
   "version": "1.0.0",
-  "description": "Proxy server for TSports streaming",
+  "description": "IPTV Playlist with access tracking and IP blocking",
   "main": "index.js",
   "scripts": {
     "dev": "vercel dev",
-    "deploy": "vercel --prod"
+    "build": "echo 'Build complete'",
+    "start": "vercel dev"
   },
   "dependencies": {},
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "keywords": [
+    "iptv",
+    "playlist",
+    "m3u",
+    "tracking"
+  ],
+  "license": "MIT"
 }
