@@ -1,22 +1,15 @@
 {
-  "name": "iptv-playlist-tracker",
+  "name": "tv-playlist",
   "version": "1.0.0",
-  "description": "IPTV Playlist with access tracking and IP blocking",
-  "main": "index.js",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "echo 'Build complete'",
-    "start": "vercel dev"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
-  "dependencies": {},
+  "dependencies": {
+    "next": "^13.0.0"
+  },
   "engines": {
-    "node": ">=18.0.0"
-  },
-  "keywords": [
-    "iptv",
-    "playlist",
-    "m3u",
-    "tracking"
-  ],
-  "license": "MIT"
+    "node": ">=18"
+  }
 }
