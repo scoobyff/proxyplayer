@@ -24,11 +24,13 @@ export function middleware(request) {
       // Read valid IDs from separate file
       const validIds = getValidIds()
       
-      // Check if provided ID is valid
-      if (!validIds.includes(id)) {
-        console.log(`Blocked access - Invalid ID: ${id} from IP: ${request.ip}`)
-        return new Response('Access Denied: Invalid ID', { 
-          status: 403,
+      // Check if provided ID is valid and not expired
+      const validationResult = validateId(id)
+      
+      if (!validationResult.isValid) {
+        console.log(`Blocked access - ${validationResult.reason}: ${id} from IP: ${request.ip}`)
+        return new Response(`Access Denied: ${validationResult.reason}`, { 
+          status: validationResult.status,
           headers: {
             'Content-Type': 'text/plain'
           }
@@ -36,10 +38,10 @@ export function middleware(request) {
       }
       
       // Valid ID - log access and allow
-      console.log(`Valid access - ID: ${id} from IP: ${request.ip}`)
+      console.log(`Valid access - ID: ${id} (${validationResult.type}) from IP: ${request.ip}`)
       
       // Optional: Log usage for analytics
-      logAccess(id, request.ip, request.geo?.country)
+      logAccess(id, request.ip, request.geo?.country, validationResult.type)
       
     } catch (error) {
       console.error('Error validating ID:', error)
@@ -50,7 +52,55 @@ export function middleware(request) {
   return NextResponse.next()
 }
 
-// Function to read valid IDs from file
+// Function to validate ID and check expiry
+function validateId(id) {
+  try {
+    const validIdsPath = join(process.cwd(), 'valid_ids.json')
+    const fileContent = readFileSync(validIdsPath, 'utf8')
+    const data = JSON.parse(fileContent)
+    
+    // Check if ID exists
+    if (!data.valid_ids || !data.valid_ids[id]) {
+      return {
+        isValid: false,
+        reason: 'Invalid ID',
+        status: 403
+      }
+    }
+    
+    const idDetails = data.valid_ids[id]
+    const currentTime = new Date()
+    const expiryDate = new Date(idDetails.expires)
+    
+    // Check if ID has expired
+    if (expiryDate <= currentTime) {
+      return {
+        isValid: false,
+        reason: 'ID Expired',
+        status: 410, // Gone
+        expiredOn: idDetails.expires
+      }
+    }
+    
+    // ID is valid and not expired
+    return {
+      isValid: true,
+      type: idDetails.type,
+      description: idDetails.description,
+      expiresOn: idDetails.expires
+    }
+    
+  } catch (error) {
+    console.error('Error validating ID:', error)
+    return {
+      isValid: false,
+      reason: 'Service Error',
+      status: 500
+    }
+  }
+}
+
+// Function to read valid IDs from file and check expiry
 function getValidIds() {
   try {
     // Read from valid_ids.json file
@@ -58,7 +108,21 @@ function getValidIds() {
     const fileContent = readFileSync(validIdsPath, 'utf8')
     const data = JSON.parse(fileContent)
     
-    return data.valid_ids || []
+    const currentTime = new Date()
+    const validIds = []
+    
+    // Check each ID for expiry
+    for (const [id, details] of Object.entries(data.valid_ids || {})) {
+      const expiryDate = new Date(details.expires)
+      
+      if (expiryDate > currentTime) {
+        validIds.push(id)
+      } else {
+        console.log(`ID expired: ${id} (expired on ${details.expires})`)
+      }
+    }
+    
+    return validIds
   } catch (error) {
     // Fallback to environment variable if file doesn't exist
     const envIds = process.env.VALID_IDS
@@ -68,14 +132,14 @@ function getValidIds() {
     
     // Default fallback IDs (remove in production)
     console.warn('No valid_ids.json found, using fallback IDs')
-    return ['sjissjsjjs', 'weekly123', 'monthly456']
+    return ['sjissjsjjs']
   }
 }
 
 // Optional: Log access for analytics
-function logAccess(id, ip, country) {
+function logAccess(id, ip, country, type) {
   const timestamp = new Date().toISOString()
-  console.log(`ACCESS_LOG: ${timestamp} | ID: ${id} | IP: ${ip} | Country: ${country}`)
+  console.log(`ACCESS_LOG: ${timestamp} | ID: ${id} | Type: ${type} | IP: ${ip} | Country: ${country}`)
   
   // You can extend this to write to database/file for analytics
 }
