@@ -1,6 +1,6 @@
 <?php
 $get = $_GET['get'];
-$mpdUrl = 'https://aka-live1-ott.izzigo.tv/5/out/u/dash/' . $get;
+$mpdUrl = 'https://tataplay.slivcdn.com/hls/live/' . $get;
 
 $mpdheads = [
   'http' => [
