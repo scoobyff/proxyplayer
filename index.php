@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 $get = $_GET['get'];
-$mpdUrl = 'https://tataplay.slivcdn.com/hls/live/' . $get;
+$mpdUrl = 'https://tataplay.slivcdn.com/hls/' . $get;
 
 // Set headers for fetching remote
 $mpdheads = [
